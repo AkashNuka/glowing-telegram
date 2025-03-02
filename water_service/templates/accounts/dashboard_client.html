@@ -1,0 +1,21 @@
+{% extends 'accounts/dashboard_base.html' %}
+
+{% block title %}Client Dashboard - Water Service{% endblock %}
+
+{% block sidebar_menu %}
+<a href="#" class="active"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+<a href="#"><i class="bi bi-cart-plus me-2"></i> New Order</a>
+<a href="#"><i class="bi bi-clock-history me-2"></i> Order History</a>
+<a href="#"><i class="bi bi-credit-card me-2"></i> Billing</a>
+<a href="#"><i class="bi bi-person me-2"></i> Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Client Dashboard</h2>
+    <button class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i> Order Water</button>
+</div>
+
+<!-- Client stats and content here -->
+<!-- ... -->
+{% endblock %}

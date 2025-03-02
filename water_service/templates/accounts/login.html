@@ -1,0 +1,143 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Login - Water Service{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="login-container">
+                <div class="text-center mb-4">
+                    <a href="/" class="text-decoration-none">
+                        <i class="bi bi-droplet-fill text-primary" style="font-size: 2rem;"></i>
+                        <h3 class="d-inline ms-2">Water Service</h3>
+                    </a>
+                </div>
+
+                {% if messages %}
+                <div class="messages mb-4">
+                    {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}" role="alert">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Login to Your Account</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="role-selector">
+                            <h5 class="mb-3">Select your role:</h5>
+                            <div class="role-option selected" onclick="selectRole('client', this)">
+                                <input type="radio" name="role" value="client" id="role-client" checked>
+                                <label for="role-client" class="mb-0">Client</label>
+                            </div>
+                            <div class="role-option" onclick="selectRole('driver', this)">
+                                <input type="radio" name="role" value="driver" id="role-driver">
+                                <label for="role-driver" class="mb-0">Driver</label>
+                            </div>
+                            <div class="role-option" onclick="selectRole('owner', this)">
+                                <input type="radio" name="role" value="owner" id="role-owner">
+                                <label for="role-owner" class="mb-0">Owner</label>
+                            </div>
+                        </div>
+
+                        <form method="post" id="login-form-client" class="login-form active">
+                            {% csrf_token %}
+                            <input type="hidden" name="role" value="client">
+                            <div class="mb-3">
+                                <label for="username-client" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username-client" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password-client" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password-client" name="password" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-login">Login as Client</button>
+                            </div>
+                        </form>
+
+                        <form method="post" id="login-form-driver" class="login-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="role" value="driver">
+                            <div class="mb-3">
+                                <label for="username-driver" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username-driver" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password-driver" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password-driver" name="password" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-login">Login as Driver</button>
+                            </div>
+                        </form>
+
+                        <form method="post" id="login-form-owner" class="login-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="role" value="owner">
+                            <div class="mb-3">
+                                <label for="username-owner" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username-owner" name="username" value="akash">
+                            </div>
+                            <div class="mb-3">
+                                <label for="password-owner" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password-owner" name="password" value="abcde12345">
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-login">Login as Owner</button>
+                            </div>
+
+                            <div class="owner-credentials">
+                                <h6 class="mb-2">Owner Credentials (Demo Only)</h6>
+                                <p class="mb-1"><strong>Username:</strong> akash</p>
+                                <p class="mb-0"><strong>Password:</strong> abcde12345</p>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-3">
+                            <p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function selectRole(role, element) {
+        // Update selected role styling
+        document.querySelectorAll('.role-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        element.classList.add('selected');
+        
+        // Check the radio button
+        document.getElementById('role-' + role).checked = true;
+        
+        // Show the corresponding login form
+        document.querySelectorAll('.login-form').forEach(form => {
+            form.classList.remove('active');
+        });
+        document.getElementById('login-form-' + role).classList.add('active');
+    }
+
+    // Add this: Check if this page is in the browser's history and 
+    // replace it to prevent going back to login page after authentication
+    if (window.history && window.history.pushState) {
+        window.addEventListener('load', function() {
+            // If coming back to this page after logging in, redirect to dashboard
+            if (document.referrer.indexOf('dashboard') > -1) {
+                window.location = '{% url "dashboard" %}';
+            }
+        });
+    }
+</script>
+{% endblock %}

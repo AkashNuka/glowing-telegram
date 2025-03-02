@@ -1,0 +1,148 @@
+{% extends 'accounts/dashboard_base.html' %}
+
+{% block title %}Driver Dashboard - Water Service{% endblock %}
+
+{% block sidebar_menu %}
+<a href="#" class="active"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+<a href="#"><i class="bi bi-truck me-2"></i> My Deliveries</a>
+<a href="#"><i class="bi bi-calendar-check me-2"></i> Schedule</a>
+<a href="#"><i class="bi bi-map me-2"></i> Route Map</a>
+<a href="#"><i class="bi bi-person me-2"></i> Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Driver Dashboard</h2>
+    <div>
+        <span class="badge bg-success me-2">Available</span>
+        <button class="btn btn-sm btn-outline-danger">Set Unavailable</button>
+    </div>
+</div>
+
+<!-- Driver stats and content here -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="dashboard-card stats-box bg-primary bg-opacity-10">
+            <div class="stats-number text-primary">5</div>
+            <div class="text-muted">Today's Deliveries</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card stats-box bg-success bg-opacity-10">
+            <div class="stats-number text-success">3</div>
+            <div class="text-muted">Completed</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card stats-box bg-warning bg-opacity-10">
+            <div class="stats-number text-warning">2</div>
+            <div class="text-muted">Pending</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card stats-box bg-info bg-opacity-10">
+            <div class="stats-number text-info">2,500L</div>
+            <div class="text-muted">Water Delivered</div>
+        </div>
+    </div>
+</div>
+
+<!-- Current Delivery -->
+<div class="dashboard-card mb-4">
+    <h4 class="mb-4">Current Delivery</h4>
+    <div class="card delivery-card">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <h5 class="text-primary">#WS-2022</h5>
+                </div>
+                <div class="col-md-3">
+                    <p class="mb-0"><strong>XYZ Hotel</strong></p>
+                    <p class="text-muted mb-0 small">123 Main St, City</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="mb-0"><strong>1000L</strong></p>
+                    <p class="text-muted mb-0 small">Water Tank</p>
+                </div>
+                <div class="col-md-3">
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="text-muted mb-0 mt-1 small">In Transit</p>
+                </div>
+                <div class="col-md-2 text-end">
+                    <button class="btn btn-sm btn-success me-1">Complete</button>
+                    <button class="btn btn-sm btn-outline-secondary">Map</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Deliveries -->
+<div class="dashboard-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Upcoming Deliveries</h4>
+    </div>
+    
+    <div class="card delivery-card">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <h5 class="text-primary">#WS-2021</h5>
+                </div>
+                <div class="col-md-3">
+                    <p class="mb-0"><strong>City Apartments</strong></p>
+                    <p class="text-muted mb-0 small">456 Oak St, City</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="mb-0"><strong>800L</strong></p>
+                    <p class="text-muted mb-0 small">Water Tank</p>
+                </div>
+                <div class="col-md-3">
+                    <span class="badge bg-info">Assigned</span>
+                    <p class="text-muted mb-0 mt-1 small">Scheduled for 2:00 PM</p>
+                </div>
+                <div class="col-md-2 text-end">
+                    <button class="btn btn-sm btn-primary me-1">Start</button>
+                    <button class="btn btn-sm btn-outline-secondary">Map</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card delivery-card">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <h5 class="text-primary">#WS-2018</h5>
+                </div>
+                <div class="col-md-3">
+                    <p class="mb-0"><strong>Downtown Office</strong></p>
+                    <p class="text-muted mb-0 small">789 Pine St, City</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="mb-0"><strong>500L</strong></p>
+                    <p class="text-muted mb-0 small">Water Tank</p>
+                </div>
+                <div class="col-md-3">
+                    <span class="badge bg-info">Assigned</span>
+                    <p class="text-muted mb-0 mt-1 small">Scheduled for 4:30 PM</p>
+                </div>
+                <div class="col-md-2 text-end">
+                    <button class="btn btn-sm btn-primary me-1">Start</button>
+                    <button class="btn btn-sm btn-outline-secondary">Map</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Route Map -->
+<div class="dashboard-card mt-4">
+    <h4 class="mb-3">Today's Route Map</h4>
+    <div class="bg-light p-3 rounded" style="height: 300px; display: flex; align-items: center; justify-content: center;">
+        <p class="text-muted">[Map Placeholder]</p>
+    </div>
+</div>
+{% endblock %}

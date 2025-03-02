@@ -1,0 +1,101 @@
+{% extends 'accounts/dashboard_base.html' %}
+
+{% block title %}Owner Dashboard - Water Service{% endblock %}
+
+{% block sidebar_menu %}
+<a href="{% url 'dashboard' %}" class="active"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+<a href="#"><i class="bi bi-people me-2"></i> Clients</a>
+<a href="#"><i class="bi bi-truck me-2"></i> Drivers</a>
+<a href="#"><i class="bi bi-cart me-2"></i> Orders</a>
+<a href="{% url 'owner_analytics' %}"><i class="bi bi-graph-up me-2"></i> Analytics</a>
+<a href="#"><i class="bi bi-gear me-2"></i> Settings</a>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Owner Dashboard</h2>
+    <span class="badge bg-success">Online</span>
+</div>
+
+<!-- Metrics Row -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <div class="h3 text-primary">₹12,750</div>
+                <div class="text-muted">Today's Revenue</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <div class="h3 text-success">42</div>
+                <div class="text-muted">Orders Today</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <div class="h3 text-info">7,800</div>
+                <div class="text-muted">Liters Delivered</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <div class="h3 text-warning">8</div>
+                <div class="text-muted">Active Drivers</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Orders</h5>
+        <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <!-- Owner dashboard table content here -->
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Client</th>
+                        <th>Quantity</th>
+                        <th>Driver</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#WS-2023</td>
+                        <td>ABC Restaurant</td>
+                        <td>500L</td>
+                        <td>John Doe</td>
+                        <td>₹1,250</td>
+                        <td><span class="badge bg-success">Delivered</span></td>
+                        <td><button class="btn btn-sm btn-outline-secondary">View</button></td>
+                    </tr>
+                    <tr>
+                        <td>#WS-2022</td>
+                        <td>XYZ Hotel</td>
+                        <td>1000L</td>
+                        <td>Mike Smith</td>
+                        <td>₹2,500</td>
+                        <td><span class="badge bg-warning">In Transit</span></td>
+                        <td><button class="btn btn-sm btn-outline-secondary">View</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
