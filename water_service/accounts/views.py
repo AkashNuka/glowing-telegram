@@ -181,7 +181,33 @@ def owner_analytics(request):
             {'name': 'Sanjay Patel', 'deliveries': 178, 'on_time': 95, 'rating': 4.5},
             {'name': 'Amit Singh', 'deliveries': 156, 'on_time': 92, 'rating': 4.0},
             {'name': 'Vikram Mehta', 'deliveries': 143, 'on_time': 88, 'rating': 3.0}
-        ]
+        ],
+        # Add monthly revenue and orders data
+        'monthly_data': {
+            'months': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            'revenue': [15000, 18000, 22000, 25000, 28000, 30000, 35000, 40000, 42000, 45000, 50000, 72500],
+            'orders': [120, 150, 180, 210, 240, 260, 280, 300, 320, 340, 360, 385]
+        },
+        # Add water usage by package type
+        'water_by_package': {
+            'labels': ['500L Standard', '1000L Premium', '1500L Enterprise', 'Custom Sizes'],
+            'data': [35, 40, 20, 5]
+        },
+        # Add order status distribution
+        'order_status': {
+            'labels': ['Delivered', 'In Transit', 'Processing', 'New', 'Cancelled'],
+            'data': [1825, 420, 350, 210, 42]
+        },
+        # Add peak delivery times
+        'peak_delivery_times': {
+            'labels': ['8-10 AM', '10-12 PM', '12-2 PM', '2-4 PM', '4-6 PM', '6-8 PM'],
+            'data': [15, 25, 20, 18, 12, 10]
+        },
+        # Add client growth data
+        'client_growth': {
+            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            'data': [10, 12, 15, 18, 22, 25, 30, 34, 38, 45, 52, 65]
+        }
     }
     
     return render(request, 'accounts/owner_analytics.html', {
