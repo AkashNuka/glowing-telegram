@@ -4,10 +4,11 @@ Views for user registration, authentication, and dashboards.
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, LoginForm
+from .forms import CustomUserCreationForm, LoginForm, OrderForm
 from django.contrib import messages
-from .models import CustomUser, AnalyticsData  # Add AnalyticsData import here
+from .models import CustomUser, AnalyticsData, Order
 from django.http import HttpResponse, JsonResponse
+from datetime import datetime, timedelta
 
 def home(request):
     """
@@ -83,7 +84,7 @@ def user_login(request):
         # Create the owner account
         owner_user = CustomUser.objects.create_user(
             username='akash',
-            email='akash@waterservice.com',
+            email='akash@watergo.com',
             password='abcde12345',
             role=CustomUser.OWNER
         )
@@ -133,14 +134,33 @@ def dashboard(request):
     
     # Set up the correct template based on user role
     if user.is_owner():
+        # Fetch recent orders for owner dashboard, including guest orders
+        recent_orders = Order.objects.all().order_by('-order_date')[:10]
+        
+        # Calculate additional metrics for owner dashboard
+        total_revenue = sum(float(order.total_amount) for order in recent_orders)
+        total_liters = sum(order.liters * order.quantity for order in recent_orders)
+        guest_orders_count = Order.objects.filter(is_guest_order=True).count()
+        
         template = 'accounts/dashboard_owner.html'
+        context = {
+            'recent_orders': recent_orders,
+            'total_revenue': total_revenue,
+            'total_liters': total_liters,
+            'guest_orders_count': guest_orders_count
+        }
     elif user.is_driver():
         template = 'accounts/dashboard_driver.html'
+        context = {}
     else:  # Client
+        # For clients, include order form and recent orders
+        form = OrderForm()
+        orders = Order.objects.filter(client=user).order_by('-order_date')[:5]
         template = 'accounts/dashboard_client.html'
+        context = {'form': form, 'orders': orders}
     
     # Render with cache control headers
-    response = render(request, template)
+    response = render(request, template, context)
     response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response['Pragma'] = 'no-cache'
     response['Expires'] = '0'
@@ -214,6 +234,85 @@ def owner_drivers(request):
     response['Expires'] = '0'
     return response
 
+@login_required
+def place_order(request):
+    """
+    Handle placing new orders from the client dashboard
+    """
+    if not request.user.is_client():
+        messages.error(request, "Only clients can place orders.")
+        return redirect('dashboard')
+        
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.client = request.user
+            
+            # Set liters based on package type
+            package_liters = {
+                'Standard': 500,
+                'Premium': 1000,
+                'Enterprise': 1500,
+            }
+            order.liters = package_liters.get(order.package_type, 0)
+            
+            # Calculate total amount
+            order.total_amount = order.calculate_total()
+            
+            order.save()
+            messages.success(request, "Order placed successfully!")
+            return redirect('dashboard')
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = OrderForm()
+        # Set default delivery date to tomorrow
+        tomorrow = datetime.now().date() + timedelta(days=1)
+        form.fields['delivery_date'].initial = tomorrow
+    
+    # Get user's recent orders
+    orders = Order.objects.filter(client=request.user).order_by('-order_date')[:5]
+    
+    return render(request, 'accounts/dashboard_client.html', {
+        'form': form,
+        'orders': orders,
+    })
+
+@login_required
+def assign_driver(request, order_id):
+    """
+    Assign a driver to an order
+    """
+    if not request.user.is_owner():
+        messages.error(request, "You don't have permission to perform this action.")
+        return redirect('dashboard')
+    
+    try:
+        order = Order.objects.get(id=order_id)
+    except Order.DoesNotExist:
+        messages.error(request, "Order not found.")
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        driver_id = request.POST.get('driver_id')
+        try:
+            driver = CustomUser.objects.get(id=driver_id, role=CustomUser.DRIVER)
+            order.driver = driver
+            order.status = 'processing'  # Update order status
+            order.save()
+            messages.success(request, f"Driver {driver.username} assigned to order #{order.id}")
+        except CustomUser.DoesNotExist:
+            messages.error(request, "Driver not found.")
+    
+    # Get available drivers
+    available_drivers = CustomUser.objects.filter(role=CustomUser.DRIVER)
+    
+    return render(request, 'accounts/assign_driver.html', {
+        'order': order,
+        'available_drivers': available_drivers
+    })
+
 def logout_confirmation(request):
     """
     Display logout confirmation page that handles history cleanup.
@@ -233,7 +332,7 @@ def check_auth(request):
 
 def guest_order(request):
     """
-    Handle orders from non-registered users.
+    Handle orders from non-registered users on the homepage.
     """
     if request.method == 'POST':
         # Process the guest order
@@ -241,8 +340,43 @@ def guest_order(request):
         email = request.POST.get('email')
         phone = request.POST.get('phone')
         address = request.POST.get('address')
-        product_type = request.POST.get('product_type')
-        liters = request.POST.get('liters')
-        quantity = request.POST.get('quantity')
+        package_type = request.POST.get('productType')
+        quantity = int(request.POST.get('quantity', 1))
+        delivery_date = request.POST.get('date')
+        delivery_time = request.POST.get('time')
+        
+        # Debug information
+        print(f"Received guest order: {name}, {email}, {package_type}, {quantity}")
+        
+        # Calculate liters based on package type
+        package_liters = {
+            'Standard': 500,
+            'Premium': 1000,
+            'Enterprise': 1500,
+        }
+        liters = package_liters.get(package_type, 0)
+        
+        # Create a new order
+        order = Order(
+            guest_name=name,
+            guest_email=email,
+            guest_phone=phone,
+            delivery_address=address,
+            package_type=package_type,
+            liters=liters,
+            quantity=quantity,
+            delivery_date=delivery_date,
+            delivery_time=delivery_time,
+            is_guest_order=True
+        )
+        
+        # Calculate total
+        order.total_amount = order.calculate_total()
+        
+        # Save the order
+        order.save()
+        
+        # Add a success message
+        messages.success(request, "Your order has been placed successfully! We'll contact you shortly to confirm.")
     
     return redirect('home')

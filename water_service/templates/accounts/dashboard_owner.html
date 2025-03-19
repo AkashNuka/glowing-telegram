@@ -1,6 +1,6 @@
 {% extends 'accounts/dashboard_base.html' %}
 
-{% block title %}Owner Dashboard - Water Service{% endblock %}
+{% block title %}Owner Dashboard - WaterGo{% endblock %}
 
 {% block sidebar_menu %}
 <a href="{% url 'dashboard' %}" class="active"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
@@ -22,7 +22,7 @@
     <div class="col-md-3">
         <div class="card shadow-sm">
             <div class="card-body text-center">
-                <div class="h3 text-primary">₹12,750</div>
+                <div class="h3 text-primary">₹{{ total_revenue|default:"0" }}</div>
                 <div class="text-muted">Today's Revenue</div>
             </div>
         </div>
@@ -30,24 +30,38 @@
     <div class="col-md-3">
         <div class="card shadow-sm">
             <div class="card-body text-center">
-                <div class="h3 text-success">42</div>
-                <div class="text-muted">Orders Today</div>
+                <div class="h3 text-success">{{ recent_orders|length }}</div>
+                <div class="text-muted">Recent Orders</div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card shadow-sm">
             <div class="card-body text-center">
-                <div class="h3 text-info">7,800</div>
-                <div class="text-muted">Liters Delivered</div>
+                <div class="h3 text-info">{{ total_liters|default:"0" }}</div>
+                <div class="text-muted">Liters Scheduled</div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card shadow-sm">
             <div class="card-body text-center">
-                <div class="h3 text-warning">8</div>
-                <div class="text-muted">Active Drivers</div>
+                <div class="h3 text-warning">{{ guest_orders_count }}</div>
+                <div class="text-muted">Guest Orders</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Filtering -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Filter Orders</h5>
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-primary active" data-filter="all">All Orders</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-filter="registered">Registered Users</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-filter="guest">Guest Orders</button>
             </div>
         </div>
     </div>
@@ -60,42 +74,141 @@
         <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
     </div>
     <div class="card-body">
+        {% if recent_orders %}
         <div class="table-responsive">
-            <!-- Owner dashboard table content here -->
-            <table class="table table-hover">
+            <table class="table table-hover" id="orders-table">
                 <thead>
                     <tr>
                         <th>Order ID</th>
                         <th>Client</th>
+                        <th>Package</th>
                         <th>Quantity</th>
-                        <th>Driver</th>
                         <th>Amount</th>
+                        <th>Delivery Date</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% for order in recent_orders %}
+                    <tr class="order-row {% if order.is_guest_order %}guest-order{% else %}registered-order{% endif %}">
+                        <td>#WS-{{ order.id }}</td>
+                        <td>
+                            {% if order.is_guest_order %}
+                            <span class="badge bg-warning">Guest</span> 
+                            <strong>{{ order.guest_name }}</strong>
+                            <br>
+                            <small class="text-muted">{{ order.guest_email }}</small>
+                            <small class="text-muted">{{ order.guest_phone }}</small>
+                            {% else %}
+                            <span class="badge bg-info">Registered</span> 
+                            <strong>{{ order.client.username }}</strong>
+                            {% endif %}
+                        </td>
+                        <td>{{ order.get_package_type_display }}</td>
+                        <td>{{ order.quantity }}</td>
+                        <td>₹{{ order.total_amount }}</td>
+                        <td>{{ order.delivery_date }} <br> {{ order.get_delivery_time_display }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if order.status == 'delivered' %}bg-success
+                                {% elif order.status == 'in_transit' %}bg-warning
+                                {% elif order.status == 'processing' %}bg-info
+                                {% elif order.status == 'cancelled' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'assign_driver' order.id %}" class="btn btn-sm btn-outline-primary">Assign Driver</a>
+                            <button class="btn btn-sm btn-outline-secondary">View</button>
+                        </td>
+                    </tr>
+                    {% empty %}
                     <tr>
-                        <td>#WS-2023</td>
-                        <td>ABC Restaurant</td>
-                        <td>500L</td>
-                        <td>John Doe</td>
-                        <td>₹1,250</td>
-                        <td><span class="badge bg-success">Delivered</span></td>
-                        <td><button class="btn btn-sm btn-outline-secondary">View</button></td>
+                        <td colspan="8" class="text-center">No orders available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No orders have been placed yet. When customers place orders, they will appear here.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Driver Availability -->
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0">Driver Availability</h5>
+    </div>
+    <div class="card-body">
+        <!-- Driver availability content here -->
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Driver Name</th>
+                        <th>Status</th>
+                        <th>Today's Deliveries</th>
+                        <th>Location</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Rajesh Kumar</td>
+                        <td><span class="badge bg-success">Available</span></td>
+                        <td>3/5 completed</td>
+                        <td>South Delhi</td>
+                        <td><button class="btn btn-sm btn-outline-primary">Assign Orders</button></td>
                     </tr>
                     <tr>
-                        <td>#WS-2022</td>
-                        <td>XYZ Hotel</td>
-                        <td>1000L</td>
-                        <td>Mike Smith</td>
-                        <td>₹2,500</td>
-                        <td><span class="badge bg-warning">In Transit</span></td>
-                        <td><button class="btn btn-sm btn-outline-secondary">View</button></td>
+                        <td>Priya Sharma</td>
+                        <td><span class="badge bg-warning text-dark">Busy</span></td>
+                        <td>2/4 completed</td>
+                        <td>East Delhi</td>
+                        <td><button class="btn btn-sm btn-outline-primary">Assign Orders</button></td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block dashboard_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Order filtering functionality
+        const filterButtons = document.querySelectorAll('[data-filter]');
+        const orderRows = document.querySelectorAll('.order-row');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const filterValue = this.getAttribute('data-filter');
+                
+                // Update active button
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show/hide rows based on filter
+                orderRows.forEach(row => {
+                    if (filterValue === 'all') {
+                        row.style.display = '';
+                    } else if (filterValue === 'guest' && row.classList.contains('guest-order')) {
+                        row.style.display = '';
+                    } else if (filterValue === 'registered' && row.classList.contains('registered-order')) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+</script>
 {% endblock %}

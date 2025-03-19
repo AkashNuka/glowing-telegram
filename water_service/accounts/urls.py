@@ -14,7 +14,9 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('guest-order/', views.guest_order, name='guest_order'),
     path('check-auth/', views.check_auth, name='check_auth'),
+    path('place-order/', views.place_order, name='place_order'),
     # Owner specific pages
     path('owner/analytics/', views.owner_analytics, name='owner_analytics'),
-    path('owner/drivers/', views.owner_drivers, name='owner_drivers'),  # New URL route
+    path('owner/drivers/', views.owner_drivers, name='owner_drivers'),
+    path('assign-driver/<int:order_id>/', views.assign_driver, name='assign_driver'),
 ]
