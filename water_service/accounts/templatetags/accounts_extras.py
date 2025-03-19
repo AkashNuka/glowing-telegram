@@ -2,7 +2,7 @@
 Custom template tags and filters for the accounts app.
 """
 from django import template
-import locale
+import builtins  # Import Python's built-in functions
 
 register = template.Library()
 
@@ -24,6 +24,6 @@ def abs(value):
     Returns the absolute value of a number.
     """
     try:
-        return abs(float(value))
+        return builtins.abs(float(value))  # Use Python's built-in abs function
     except (ValueError, TypeError):
         return value

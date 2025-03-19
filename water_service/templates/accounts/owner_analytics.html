@@ -1,6 +1,7 @@
 {% extends 'accounts/dashboard_base.html' %}
+{% load accounts_extras %}
 
-{% block title %}Business Analytics - Water Service{% endblock %}
+{% block title %}Business Analytics - WaterGo{% endblock %}
 
 {% block dashboard_css %}
 <style>
@@ -62,7 +63,7 @@
 {% block sidebar_menu %}
 <a href="{% url 'dashboard' %}"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
 <a href="#"><i class="bi bi-people me-2"></i> Clients</a>
-<a href="#"><i class="bi bi-truck me-2"></i> Drivers</a>
+<a href="{% url 'owner_drivers' %}"><i class="bi bi-truck me-2"></i> Drivers</a>
 <a href="#"><i class="bi bi-cart me-2"></i> Orders</a>
 <a href="{% url 'owner_analytics' %}" class="active"><i class="bi bi-graph-up me-2"></i> Analytics</a>
 <a href="#"><i class="bi bi-gear me-2"></i> Settings</a>
@@ -242,27 +243,71 @@
         </div>
     </div>
 </div>
+
+<!-- New row for additional charts -->
+<div class="row">
+    <div class="col-md-6">
+        <!-- Peak Delivery Times -->
+        <div class="chart-card">
+            <h5 class="mb-3">Peak Delivery Times</h5>
+            <div style="height: 250px;">
+                <canvas id="peakDeliveryChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <!-- Client Growth -->
+        <div class="chart-card">
+            <h5 class="mb-3">Client Growth</h5>
+            <div style="height: 250px;">
+                <canvas id="clientGrowthChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block dashboard_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Sample data for charts
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const revenueData = [15000, 18000, 22000, 25000, 28000, 30000, 35000, 40000, 42000, 45000, 50000, 72500];
-        const ordersData = [120, 150, 180, 210, 240, 260, 280, 300, 320, 340, 360, 385];
+        // Get data from backend
+        const monthlyData = {
+            months: {{ analytics_data.monthly_data.months|safe }},
+            revenue: {{ analytics_data.monthly_data.revenue|safe }},
+            orders: {{ analytics_data.monthly_data.orders|safe }}
+        };
+
+        const waterPackageData = {
+            labels: {{ analytics_data.water_by_package.labels|safe }},
+            data: {{ analytics_data.water_by_package.data|safe }}
+        };
+
+        const orderStatusData = {
+            labels: {{ analytics_data.order_status.labels|safe }},
+            data: {{ analytics_data.order_status.data|safe }}
+        };
+
+        const peakDeliveryData = {
+            labels: {{ analytics_data.peak_delivery_times.labels|safe }},
+            data: {{ analytics_data.peak_delivery_times.data|safe }}
+        };
+
+        const clientGrowthData = {
+            labels: {{ analytics_data.client_growth.labels|safe }},
+            data: {{ analytics_data.client_growth.data|safe }}
+        };
         
         // Revenue & Orders Chart
         const revenueOrdersCtx = document.getElementById('revenueOrdersChart').getContext('2d');
         new Chart(revenueOrdersCtx, {
             type: 'line',
             data: {
-                labels: months,
+                labels: monthlyData.months,
                 datasets: [
                     {
                         label: 'Revenue (₹)',
-                        data: revenueData,
+                        data: monthlyData.revenue,
                         borderColor: '#198754',
                         backgroundColor: 'rgba(25, 135, 84, 0.1)',
                         borderWidth: 2,
@@ -272,7 +317,7 @@
                     },
                     {
                         label: 'Orders',
-                        data: ordersData,
+                        data: monthlyData.orders,
                         borderColor: '#0d6efd',
                         backgroundColor: 'rgba(13, 110, 253, 0.1)',
                         borderWidth: 2,
@@ -319,9 +364,9 @@
         new Chart(waterVolumeCtx, {
             type: 'pie',
             data: {
-                labels: ['500L Standard', '1000L Premium', '1500L Enterprise', 'Custom Sizes'],
+                labels: waterPackageData.labels,
                 datasets: [{
-                    data: [35, 40, 20, 5],
+                    data: waterPackageData.data,
                     backgroundColor: [
                         '#0d6efd',
                         '#198754',
@@ -346,10 +391,10 @@
         new Chart(orderStatusCtx, {
             type: 'bar',
             data: {
-                labels: ['Delivered', 'In Transit', 'Processing', 'New', 'Cancelled'],
+                labels: orderStatusData.labels,
                 datasets: [{
                     label: 'Orders',
-                    data: [1825, 420, 350, 210, 42],
+                    data: orderStatusData.data,
                     backgroundColor: [
                         '#198754',
                         '#ffc107',
@@ -368,6 +413,63 @@
                         title: {
                             display: true,
                             text: 'Number of Orders'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Peak Delivery Times Chart
+        const peakDeliveryCtx = document.getElementById('peakDeliveryChart').getContext('2d');
+        new Chart(peakDeliveryCtx, {
+            type: 'bar',
+            data: {
+                labels: peakDeliveryData.labels,
+                datasets: [{
+                    label: 'Percentage of Deliveries',
+                    data: peakDeliveryData.data,
+                    backgroundColor: '#0d6efd',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Percentage (%)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Client Growth Chart
+        const clientGrowthCtx = document.getElementById('clientGrowthChart').getContext('2d');
+        new Chart(clientGrowthCtx, {
+            type: 'line',
+            data: {
+                labels: clientGrowthData.labels,
+                datasets: [{
+                    label: 'New Clients',
+                    data: clientGrowthData.data,
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of New Clients'
                         }
                     }
                 }

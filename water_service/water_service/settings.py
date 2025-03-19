@@ -25,9 +25,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',  # Our custom accounts app
+    'django_browser_reload',  # For auto-reload
 ]
 
 MIDDLEWARE = [
+    # Add django_browser_reload middleware at the top
+    "django_browser_reload.middleware.BrowserReloadMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -102,3 +105,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Login redirect URLs
 LOGIN_REDIRECT_URL = '/accounts/dashboard/'
 LOGIN_URL = '/accounts/login/'
+
+# CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = [
+    'https://localhost:8000',
+]

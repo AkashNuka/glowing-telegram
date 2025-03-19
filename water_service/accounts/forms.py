@@ -3,7 +3,7 @@ Forms for user registration and management.
 """
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import CustomUser
+from .models import CustomUser, Order
 
 class CustomUserCreationForm(UserCreationForm):
     """
@@ -60,3 +60,31 @@ class LoginForm(forms.Form):
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={'class': 'form-control'})
     )
+
+class OrderForm(forms.ModelForm):
+    """
+    Form for creating water orders
+    """
+    DELIVERY_TIME_CHOICES = [
+        ('morning', 'Morning (9AM - 12PM)'),
+        ('afternoon', 'Afternoon (12PM - 3PM)'),
+        ('evening', 'Evening (3PM - 6PM)'),
+    ]
+    
+    delivery_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
+    
+    delivery_time = forms.ChoiceField(
+        choices=DELIVERY_TIME_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    class Meta:
+        model = Order
+        fields = ('package_type', 'quantity', 'delivery_address', 'delivery_date', 'delivery_time')
+        widgets = {
+            'package_type': forms.Select(attrs={'class': 'form-select'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': '1', 'max': '10'}),
+            'delivery_address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
