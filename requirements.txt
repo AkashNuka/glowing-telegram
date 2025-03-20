@@ -4,4 +4,4 @@ platformdirs==4.2.2
 pynput==1.7.7
 PyPDF2==3.0.1
 six==1.16.0
-gunicorn=23.0.0
+gunicorn==23.0.0
