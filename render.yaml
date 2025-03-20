@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: water-service
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn water_service.wsgi:application

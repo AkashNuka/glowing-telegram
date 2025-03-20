@@ -4,4 +4,5 @@ platformdirs==4.2.2
 pynput==1.7.7
 PyPDF2==3.0.1
 six==1.16.0
-virtualenv==20.26.3
+Django==5.1.7
+gunicorn==21.2.0
