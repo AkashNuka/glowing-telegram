@@ -1,9 +1,0 @@
-services:
-  - type: web
-    name: water-service
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: cd water_service && gunicorn water_service.wsgi:application
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11

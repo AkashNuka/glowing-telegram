@@ -12,8 +12,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-your-secret-key-here'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-ALLOWED_HOSTS = ['glowing-telegram-ave5.onrender.com', 'localhost', '127.0.0.1']
+DEBUG = True
+ALLOWED_HOSTS = []
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -108,6 +108,3 @@ LOGIN_URL = '/accounts/login/'
 CSRF_TRUSTED_ORIGINS = [
     'https://localhost:8000',
 ]
-# Add this to settings.py
-MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
