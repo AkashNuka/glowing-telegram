@@ -3,4 +3,7 @@ services:
     name: water-service
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn water_service.wsgi:application
+    startCommand: cd water_service && gunicorn water_service.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
