@@ -23,5 +23,9 @@ WORKDIR /app/water_service
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
+# Make migrations and migrate
+RUN python manage.py makemigrations
+RUN python manage.py migrate
+
 # Run gunicorn
 CMD gunicorn --bind 0.0.0.0:$PORT water_service.wsgi:application
